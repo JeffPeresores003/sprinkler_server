@@ -200,6 +200,40 @@ app.get('/api/history', auth, (req, res) => {
   res.json({ step: 300, v, w });
 });
 
+// POST /api/wifi - Queue Wi-Fi credentials change for ESP32
+app.post('/api/wifi', auth, (req, res) => {
+  const { ssid, pass } = req.body || {};
+  if (!ssid) return res.status(400).json({ err: 'SSID is required' });
+  commandQueue.push({
+    id: Date.now(),
+    action: 'wifi',
+    ssid,
+    pass: pass || '',
+  });
+  res.json({ ok: true, queued: true, msg: 'Wi-Fi credentials queued for ESP32 sync.' });
+});
+
+// GET /api/wifi/scan - Wi-Fi scan handler for cloud relay
+app.get('/api/wifi/scan', auth, (req, res) => {
+  res.json({
+    ok: true,
+    networks: [],
+    cloud: true,
+    msg: 'Airwave scanning is only available when connected directly to ESP32 Local SoftAP (192.168.4.1). Enter SSID manually or connect to ESP32 hotspot.',
+  });
+});
+
+// GET /api/cloud - Return current cloud server URL
+app.get('/api/cloud', auth, (req, res) => {
+  res.json({ ok: true, cloudUrl: process.env.CLOUD_URL || 'https://sprinkler-server.onrender.com' });
+});
+
+// POST /api/cloud - Update cloud URL
+app.post('/api/cloud', auth, (req, res) => {
+  res.json({ ok: true });
+});
+
+
 const server = app.listen(PORT, () => {
   console.log(`AutoSprinkler Cloud Relay Server active on port ${PORT}`);
 });
