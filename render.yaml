@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: sprinkler-server
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: API_TOKEN
+        value: sprk_9e33b52a39bd26e323871d6cd01c483e
